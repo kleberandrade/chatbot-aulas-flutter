@@ -74,3 +74,9 @@
 
 # Credentials
 **/assets/credentials.json
+# Local verification and secrets
+coverage/
+.metrics/
+.env
+.env.*
+**/*service-account*.json

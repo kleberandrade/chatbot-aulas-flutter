@@ -1,132 +1,342 @@
-import 'package:chatbot/models/chat_message.dart';
-import 'package:chatbot/widgets/chat_message_list_item.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dialogflow/dialogflow_v2.dart';
+import 'package:material_ui/material_ui.dart';
+
+import '../domain/conversation.dart';
+import '../domain/local_tutor.dart';
+import '../widgets/chat_message_list_item.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key, this.tutor = const LocalTutor()});
+  final Tutor tutor;
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final _messageList = <ChatMessage>[];
-  final _controllerText = new TextEditingController();
+  late final Conversation _chat;
+  final _input = TextEditingController();
+  final _scroll = ScrollController();
+  final _focus = FocusNode();
 
   @override
-  void dispose() {
-    super.dispose();
-    _controllerText.dispose();
+  void initState() {
+    super.initState();
+    _chat = Conversation(tutor: widget.tutor)..addListener(_changed);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: new AppBar(
-        title: Text('Chatbot - Professor'),
-      ),
-      body: Column(
-        children: <Widget>[
-          _buildList(),
-          Divider(height: 1.0),
-          _buildUserInput(),
-        ],
-      ),
-    );
-  }
-
-  // Cria a lista de mensagens (de baixo para cima)
-  Widget _buildList() {
-    return Flexible(
-      child: ListView.builder(
-        padding: EdgeInsets.all(8.0),
-        reverse: true,
-        itemBuilder: (_, int index) => ChatMessageListItem(chatMessage: _messageList[index]),
-        itemCount: _messageList.length,
-      ),
-    );
-  }
-
-  Future _dialogFlowRequest({String query}) async {
-    // Adiciona uma mensagem temporária na lista
-    _addMessage(
-        name: 'Professor',
-        text: 'Escrevendo...',
-        type: ChatMessageType.received);
-
-    // Faz a autenticação com o serviço, envia a mensagem e recebe uma resposta da Intent
-    AuthGoogle authGoogle = await AuthGoogle(fileJson: "assets/credentials.json").build();
-    Dialogflow dialogflow = Dialogflow(authGoogle: authGoogle, language: "pt-BR");
-    AIResponse response = await dialogflow.detectIntent(query);
-
-    // remove a mensagem temporária
-    setState(() {
-      _messageList.removeAt(0);
+  void _changed() {
+    if (!mounted) return;
+    setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      }
     });
-
-    // adiciona a mensagem com a resposta do DialogFlow
-    _addMessage(
-        name: 'Professor',
-        text: response.getMessage() ?? '',
-        type: ChatMessageType.received);
   }
 
-  // Envia uma mensagem com o padrão a direita
-  void _sendMessage({String text}) {
-    _controllerText.clear();
-    _addMessage(name: 'Kleber Andrade', text: text, type: ChatMessageType.sent);
-  }
-
-  // Adiciona uma mensagem na lista de mensagens
-  void _addMessage({String name, String text, ChatMessageType type}) {
-    var message = ChatMessage(
-        text: text, name: name, type: type);
-    setState(() {
-      _messageList.insert(0, message);
-    });
-
-    if (type == ChatMessageType.sent) {
-      // Envia a mensagem para o chatbot e aguarda sua resposta
-      _dialogFlowRequest(query: message.text);  
+  Future<void> _send([String? suggestion]) async {
+    final text = suggestion ?? _input.text;
+    if (_chat.isSending ||
+        _chat.error != null ||
+        !Conversation.validText(text)) {
+      return;
+    }
+    _input.clear();
+    await _chat.send(text);
+    if (mounted && _chat.error == null) {
+      _focus.requestFocus();
     }
   }
 
-  // Campo para escrever a mensagem
-  Widget _buildTextField() {
-    return new Flexible(
-      child: new TextField(
-        controller: _controllerText,
-        decoration: new InputDecoration.collapsed(
-          hintText: "Enviar mensagem",
+  void _reset() {
+    _chat.reset();
+    _input.clear();
+    _focus.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _chat.removeListener(_changed);
+    _chat.dispose();
+    _input.dispose();
+    _scroll.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'CONVERSA / LABORATÓRIO 01',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  MediaQuery.sizeOf(context).width < 600
+                      ? 'Conversa'
+                      : 'Uma pergunta. Uma descoberta.',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 6),
+                if (MediaQuery.sizeOf(context).width >= 600)
+                  const Text(
+                    'Explore como um chatbot reconhece intenções e encontra informações.',
+                  ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (constraints.maxWidth >= 900) ...[
+                          SizedBox(width: 240, child: _guide()),
+                          const SizedBox(width: 24),
+                        ],
+                        Expanded(child: _conversation()),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  // Botão para enviar a mensagem
-  Widget _buildSendButton() {
-    return new Container(
-      margin: new EdgeInsets.only(left: 8.0),
-      child: new IconButton(
-          icon: new Icon(Icons.send, color: Theme.of(context).accentColor),
-          onPressed: () {
-            if (_controllerText.text.isNotEmpty) {
-              _sendMessage(text: _controllerText.text);
-            }
-          }),
-    );
-  }
+  Widget _guide() => SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.forum_outlined, size: 40, color: Color(0xFFA33F17)),
+        const SizedBox(height: 20),
+        const Text(
+          'Aprenda conversando',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          '01  Escreva uma pergunta\n02  Observe a intent\n03  Descubra as entidades',
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Divider(),
+        ),
+        const Text(
+          'Regras locais, resultados visíveis.',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Sem conta, sem credenciais e sem nuvem. As respostas são exemplos didáticos definidos no código.',
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'E o Dialogflow?',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'A aula explica intents e entidades e o caminho de uma integração segura pelo seu servidor.',
+        ),
+      ],
+    ),
+  );
 
-  // Monta uma linha com o campo de text e o botão de enviao
-  Widget _buildUserInput() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Row(
-        children: <Widget>[
-          _buildTextField(),
-          _buildSendButton(),
-        ],
-      ),
-    );
-  }
+  Widget _conversation() => DecoratedBox(
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFFDF9),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: const Color(0xFFDED7CD)),
+    ),
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              if (MediaQuery.sizeOf(context).width >= 600)
+                const CircleAvatar(
+                  backgroundColor: Color(0xFFF7DDCB),
+                  child: Icon(Icons.school_outlined, color: Color(0xFF7F3016)),
+                ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tutor local',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      MediaQuery.textScalerOf(context).scale(1) > 1.5
+                          ? 'Local • sem nuvem'
+                          : 'Demonstração local • sem nuvem',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF52594C)),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: _reset,
+                tooltip: 'Reiniciar conversa',
+                icon: const Icon(Icons.restart_alt),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: ListView(
+            controller: _scroll,
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (_chat.messages.isEmpty) _welcome(),
+              for (final message in _chat.messages)
+                ChatMessageListItem(
+                  key: ValueKey(message.id),
+                  message: message,
+                ),
+              if (_chat.isSending)
+                Semantics(
+                  liveRegion: true,
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('Tutor está respondendo…'),
+                  ),
+                ),
+              if (_chat.error case final String error)
+                Semantics(
+                  liveRegion: true,
+                  child: Card(
+                    color: const Color(0xFFFFE9DE),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(error),
+                          TextButton.icon(
+                            onPressed: _chat.retry,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Tentar novamente'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        _composer(),
+      ],
+    ),
+  );
+
+  Widget _welcome() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Vamos conversar?',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Sou um tutor de demonstração. Escolha um tema ou escreva sua pergunta.',
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final text in [
+              'Quero aprender Flutter',
+              'O que é uma intent?',
+              'O que é uma entidade?',
+            ])
+              ActionChip(label: Text(text), onPressed: () => _send(text)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'Não envie dados pessoais. A conversa fica apenas na memória desta sessão.',
+          style: TextStyle(fontSize: 12, color: Color(0xFF5D605F)),
+        ),
+      ],
+    ),
+  );
+
+  Widget _composer() => Padding(
+    padding: const EdgeInsets.all(12),
+    child: ValueListenableBuilder(
+      valueListenable: _input,
+      builder: (context, value, child) {
+        final count = value.text.trim().runes.length;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _input,
+                focusNode: _focus,
+                enabled: !_chat.isSending && _chat.error == null,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _send(),
+                decoration: InputDecoration(
+                  labelText: 'Sua mensagem',
+                  hintText: 'Pergunte ao tutor…',
+                  counterText: '$count / 500',
+                  errorText: count > 500
+                      ? 'Use até 500 caracteres Unicode.'
+                      : null,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: IconButton.filled(
+                onPressed:
+                    !_chat.isSending &&
+                        _chat.error == null &&
+                        Conversation.validText(value.text)
+                    ? _send
+                    : null,
+                tooltip: 'Enviar mensagem',
+                icon: const Icon(Icons.arrow_upward),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
 }
