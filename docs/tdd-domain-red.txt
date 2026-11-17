@@ -1,0 +1,176 @@
+00:00 +0: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart
+test/conversation_test.dart:2:8: Error: Error when reading 'lib/domain/conversation.dart': No such file or directory
+import 'package:chatbot/domain/conversation.dart';
+       ^
+test/conversation_test.dart:3:8: Error: Error when reading 'lib/domain/local_tutor.dart': No such file or directory
+import 'package:chatbot/domain/local_tutor.dart';
+       ^
+test/conversation_test.dart:95:34: Error: Type 'Tutor' not found.
+class ControlledTutor implements Tutor {
+                                 ^^^^^
+test/conversation_test.dart:96:13: Error: Type 'BotReply' not found.
+  Completer<BotReply> pending = Completer<BotReply>();
+            ^^^^^^^^
+test/conversation_test.dart:98:10: Error: Type 'BotReply' not found.
+  Future<BotReply> reply(String text) => pending.future;
+         ^^^^^^^^
+test/conversation_test.dart:100:29: Error: Type 'Tutor' not found.
+class EmptyTutor implements Tutor {
+                            ^^^^^
+test/conversation_test.dart:102:10: Error: Type 'BotReply' not found.
+  Future<BotReply> reply(String text) async => const BotReply('  ', 'fallback');
+         ^^^^^^^^
+test/conversation_test.dart:8:19: Error: Method not found: 'LocalTutor'.
+    const tutor = LocalTutor();
+                  ^^^^^^^^^^
+test/conversation_test.dart:18:44: Error: Couldn't find constructor 'LocalTutor'.
+    final chat = Conversation(tutor: const LocalTutor(), clock: () => DateTime(2026, 11, 17, 10));
+                                           ^^^^^^^^^^
+test/conversation_test.dart:18:18: Error: Method not found: 'Conversation'.
+    final chat = Conversation(tutor: const LocalTutor(), clock: () => DateTime(2026, 11, 17, 10));
+                 ^^^^^^^^^^^^
+test/conversation_test.dart:24:49: Error: Undefined name 'Author'.
+    expect(chat.messages.map((m) => m.author), [Author.you, Author.tutor]);
+                                                ^^^^^^
+test/conversation_test.dart:24:61: Error: Undefined name 'Author'.
+    expect(chat.messages.map((m) => m.author), [Author.you, Author.tutor]);
+                                                            ^^^^^^
+test/conversation_test.dart:31:44: Error: Couldn't find constructor 'LocalTutor'.
+    final chat = Conversation(tutor: const LocalTutor());
+                                           ^^^^^^^^^^
+test/conversation_test.dart:31:18: Error: Method not found: 'Conversation'.
+    final chat = Conversation(tutor: const LocalTutor());
+                 ^^^^^^^^^^^^
+test/conversation_test.dart:38:18: Error: Method not found: 'Conversation'.
+    final chat = Conversation(tutor: tutor);
+                 ^^^^^^^^^^^^
+test/conversation_test.dart:47:31: Error: 'BotReply' isn't a type.
+    tutor.pending = Completer<BotReply>();
+                              ^^^^^^^^
+test/conversation_test.dart:50:34: Error: Couldn't find constructor 'BotReply'.
+    tutor.pending.complete(const BotReply('Olá', 'greeting'));
+                                 ^^^^^^^^
+test/conversation_test.dart:59:18: Error: Method not found: 'Conversation'.
+    final chat = Conversation(tutor: tutor);
+                 ^^^^^^^^^^^^
+test/conversation_test.dart:63:31: Error: 'BotReply' isn't a type.
+    tutor.pending = Completer<BotReply>();
+                              ^^^^^^^^
+test/conversation_test.dart:65:31: Error: Couldn't find constructor 'BotReply'.
+    oldPending.complete(const BotReply('stale', 'fallback'));
+                              ^^^^^^^^
+test/conversation_test.dart:69:34: Error: Couldn't find constructor 'BotReply'.
+    tutor.pending.complete(const BotReply('fresh', 'fallback'));
+                                 ^^^^^^^^
+test/conversation_test.dart:76:18: Error: Method not found: 'Conversation'.
+    final chat = Conversation(tutor: tutor);
+                 ^^^^^^^^^^^^
+test/conversation_test.dart:79:34: Error: Couldn't find constructor 'BotReply'.
+    tutor.pending.complete(const BotReply('late', 'fallback'));
+                                 ^^^^^^^^
+test/conversation_test.dart:82:21: Error: Method not found: 'Conversation'.
+    final timeout = Conversation(tutor: ControlledTutor(), timeout: Duration.zero);
+                    ^^^^^^^^^^^^
+test/conversation_test.dart:87:19: Error: Method not found: 'Conversation'.
+    final empty = Conversation(tutor: EmptyTutor());
+                  ^^^^^^^^^^^^
+test/conversation_test.dart:96:13: Error: 'BotReply' isn't a type.
+  Completer<BotReply> pending = Completer<BotReply>();
+            ^^^^^^^^
+test/conversation_test.dart:96:43: Error: 'BotReply' isn't a type.
+  Completer<BotReply> pending = Completer<BotReply>();
+                                          ^^^^^^^^
+test/conversation_test.dart:102:54: Error: Not a constant expression.
+  Future<BotReply> reply(String text) async => const BotReply('  ', 'fallback');
+                                                     ^^^^^^^^
+00:00 +0 -1: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart [E]
+  Failed to load "/Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart":
+  Compilation failed for testPath=/Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart: test/conversation_test.dart:2:8: Error: Error when reading 'lib/domain/conversation.dart': No such file or directory
+  import 'package:chatbot/domain/conversation.dart';
+         ^
+  test/conversation_test.dart:3:8: Error: Error when reading 'lib/domain/local_tutor.dart': No such file or directory
+  import 'package:chatbot/domain/local_tutor.dart';
+         ^
+  test/conversation_test.dart:95:34: Error: Type 'Tutor' not found.
+  class ControlledTutor implements Tutor {
+                                   ^^^^^
+  test/conversation_test.dart:96:13: Error: Type 'BotReply' not found.
+    Completer<BotReply> pending = Completer<BotReply>();
+              ^^^^^^^^
+  test/conversation_test.dart:98:10: Error: Type 'BotReply' not found.
+    Future<BotReply> reply(String text) => pending.future;
+           ^^^^^^^^
+  test/conversation_test.dart:100:29: Error: Type 'Tutor' not found.
+  class EmptyTutor implements Tutor {
+                              ^^^^^
+  test/conversation_test.dart:102:10: Error: Type 'BotReply' not found.
+    Future<BotReply> reply(String text) async => const BotReply('  ', 'fallback');
+           ^^^^^^^^
+  test/conversation_test.dart:8:19: Error: Method not found: 'LocalTutor'.
+      const tutor = LocalTutor();
+                    ^^^^^^^^^^
+  test/conversation_test.dart:18:44: Error: Couldn't find constructor 'LocalTutor'.
+      final chat = Conversation(tutor: const LocalTutor(), clock: () => DateTime(2026, 11, 17, 10));
+                                             ^^^^^^^^^^
+  test/conversation_test.dart:18:18: Error: Method not found: 'Conversation'.
+      final chat = Conversation(tutor: const LocalTutor(), clock: () => DateTime(2026, 11, 17, 10));
+                   ^^^^^^^^^^^^
+  test/conversation_test.dart:24:49: Error: Undefined name 'Author'.
+      expect(chat.messages.map((m) => m.author), [Author.you, Author.tutor]);
+                                                  ^^^^^^
+  test/conversation_test.dart:24:61: Error: Undefined name 'Author'.
+      expect(chat.messages.map((m) => m.author), [Author.you, Author.tutor]);
+                                                              ^^^^^^
+  test/conversation_test.dart:31:44: Error: Couldn't find constructor 'LocalTutor'.
+      final chat = Conversation(tutor: const LocalTutor());
+                                             ^^^^^^^^^^
+  test/conversation_test.dart:31:18: Error: Method not found: 'Conversation'.
+      final chat = Conversation(tutor: const LocalTutor());
+                   ^^^^^^^^^^^^
+  test/conversation_test.dart:38:18: Error: Method not found: 'Conversation'.
+      final chat = Conversation(tutor: tutor);
+                   ^^^^^^^^^^^^
+  test/conversation_test.dart:47:31: Error: 'BotReply' isn't a type.
+      tutor.pending = Completer<BotReply>();
+                                ^^^^^^^^
+  test/conversation_test.dart:50:34: Error: Couldn't find constructor 'BotReply'.
+      tutor.pending.complete(const BotReply('Olá', 'greeting'));
+                                   ^^^^^^^^
+  test/conversation_test.dart:59:18: Error: Method not found: 'Conversation'.
+      final chat = Conversation(tutor: tutor);
+                   ^^^^^^^^^^^^
+  test/conversation_test.dart:63:31: Error: 'BotReply' isn't a type.
+      tutor.pending = Completer<BotReply>();
+                                ^^^^^^^^
+  test/conversation_test.dart:65:31: Error: Couldn't find constructor 'BotReply'.
+      oldPending.complete(const BotReply('stale', 'fallback'));
+                                ^^^^^^^^
+  test/conversation_test.dart:69:34: Error: Couldn't find constructor 'BotReply'.
+      tutor.pending.complete(const BotReply('fresh', 'fallback'));
+                                   ^^^^^^^^
+  test/conversation_test.dart:76:18: Error: Method not found: 'Conversation'.
+      final chat = Conversation(tutor: tutor);
+                   ^^^^^^^^^^^^
+  test/conversation_test.dart:79:34: Error: Couldn't find constructor 'BotReply'.
+      tutor.pending.complete(const BotReply('late', 'fallback'));
+                                   ^^^^^^^^
+  test/conversation_test.dart:82:21: Error: Method not found: 'Conversation'.
+      final timeout = Conversation(tutor: ControlledTutor(), timeout: Duration.zero);
+                      ^^^^^^^^^^^^
+  test/conversation_test.dart:87:19: Error: Method not found: 'Conversation'.
+      final empty = Conversation(tutor: EmptyTutor());
+                    ^^^^^^^^^^^^
+  test/conversation_test.dart:96:13: Error: 'BotReply' isn't a type.
+    Completer<BotReply> pending = Completer<BotReply>();
+              ^^^^^^^^
+  test/conversation_test.dart:96:43: Error: 'BotReply' isn't a type.
+    Completer<BotReply> pending = Completer<BotReply>();
+                                            ^^^^^^^^
+  test/conversation_test.dart:102:54: Error: Not a constant expression.
+    Future<BotReply> reply(String text) async => const BotReply('  ', 'fallback');
+                                                       ^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/conversation_test.dart

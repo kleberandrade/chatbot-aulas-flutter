@@ -1,0 +1,176 @@
+00:00 +0: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart
+Error: Couldn't resolve the package 'flutter_dialogflow' in 'package:flutter_dialogflow/dialogflow_v2.dart'.
+lib/views/home_page.dart:4:8: Error: Not found: 'package:flutter_dialogflow/dialogflow_v2.dart'
+import 'package:flutter_dialogflow/dialogflow_v2.dart';
+       ^
+lib/views/home_page.dart:49:37: Error: The parameter 'query' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  Future _dialogFlowRequest({String query}) async {
+                                    ^^^^^
+lib/views/home_page.dart:74:29: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  void _sendMessage({String text}) {
+                            ^^^^
+lib/views/home_page.dart:80:28: Error: The parameter 'name' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  void _addMessage({String name, String text, ChatMessageType type}) {
+                           ^^^^
+lib/views/home_page.dart:80:41: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  void _addMessage({String name, String text, ChatMessageType type}) {
+                                        ^^^^
+lib/views/home_page.dart:80:63: Error: The parameter 'type' can't have a value of 'null' because of its type 'ChatMessageType', but the implicit default value is 'null'.
+ - 'ChatMessageType' is from 'package:chatbot/models/chat_message.dart' ('lib/models/chat_message.dart').
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  void _addMessage({String name, String text, ChatMessageType type}) {
+                                                              ^^^^
+lib/models/chat_message.dart:9:10: Error: The parameter 'name' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+    this.name,
+         ^^^^
+lib/models/chat_message.dart:10:10: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+    this.text,
+         ^^^^
+lib/widgets/chat_message_list_item.dart:16:39: Error: The parameter 'padding' can't have a value of 'null' because of its type 'EdgeInsets', but the implicit default value is 'null'.
+ - 'EdgeInsets' is from 'package:flutter/src/painting/edge_insets.dart' ('/private/tmp/chatbot-sdk-3.50.0/packages/flutter/lib/src/painting/edge_insets.dart').
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  Widget _showSentMessage({EdgeInsets padding, TextAlign textAlign}) {
+                                      ^^^^^^^
+lib/widgets/chat_message_list_item.dart:16:58: Error: The parameter 'textAlign' can't have a value of 'null' because of its type 'TextAlign', but the implicit default value is 'null'.
+ - 'TextAlign' is from 'dart:ui'.
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  Widget _showSentMessage({EdgeInsets padding, TextAlign textAlign}) {
+                                                         ^^^^^^^^^
+lib/widgets/chat_message_list_item.dart:7:29: Error: The parameter 'chatMessage' can't have a value of 'null' because of its type 'ChatMessage', but the implicit default value is 'null'.
+ - 'ChatMessage' is from 'package:chatbot/models/chat_message.dart' ('lib/models/chat_message.dart').
+Try adding either an explicit non-'null' default value or the 'required' modifier.
+  ChatMessageListItem({this.chatMessage});
+                            ^^^^^^^^^^^
+test/widget_test.dart:9:35: Error: Couldn't find constructor 'TutorApp'.
+    await tester.pumpWidget(const TutorApp());
+                                  ^^^^^^^^
+test/widget_test.dart:24:35: Error: Couldn't find constructor 'TutorApp'.
+    await tester.pumpWidget(const TutorApp());
+                                  ^^^^^^^^
+test/widget_test.dart:36:29: Error: Method not found: 'TutorApp'.
+    await tester.pumpWidget(TutorApp(tutor: tutor));
+                            ^^^^^^^^
+test/widget_test.dart:61:20: Error: Couldn't find constructor 'HomePage'.
+      child: const HomePage(),
+                   ^^^^^^^^
+lib/views/home_page.dart:57:5: Error: 'AuthGoogle' isn't a type.
+    AuthGoogle authGoogle = await AuthGoogle(fileJson: "assets/credentials.json").build();
+    ^^^^^^^^^^
+lib/views/home_page.dart:58:5: Error: 'Dialogflow' isn't a type.
+    Dialogflow dialogflow = Dialogflow(authGoogle: authGoogle, language: "pt-BR");
+    ^^^^^^^^^^
+lib/views/home_page.dart:59:5: Error: 'AIResponse' isn't a type.
+    AIResponse response = await dialogflow.detectIntent(query);
+    ^^^^^^^^^^
+lib/views/home_page.dart:57:35: Error: The method 'AuthGoogle' isn't defined for the type '_HomePageState'.
+ - '_HomePageState' is from 'package:chatbot/views/home_page.dart' ('lib/views/home_page.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'AuthGoogle'.
+    AuthGoogle authGoogle = await AuthGoogle(fileJson: "assets/credentials.json").build();
+                                  ^^^^^^^^^^
+lib/views/home_page.dart:58:29: Error: The method 'Dialogflow' isn't defined for the type '_HomePageState'.
+ - '_HomePageState' is from 'package:chatbot/views/home_page.dart' ('lib/views/home_page.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Dialogflow'.
+    Dialogflow dialogflow = Dialogflow(authGoogle: authGoogle, language: "pt-BR");
+                            ^^^^^^^^^^
+lib/views/home_page.dart:110:63: Error: The getter 'accentColor' isn't defined for the type 'ThemeData'.
+ - 'ThemeData' is from 'package:flutter/src/material/theme_data.dart' ('/private/tmp/chatbot-sdk-3.50.0/packages/flutter/lib/src/material/theme_data.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'accentColor'.
+          icon: new Icon(Icons.send, color: Theme.of(context).accentColor),
+                                                              ^^^^^^^^^^^
+00:00 +0 -1: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart [E]
+  Failed to load "/Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart":
+  Compilation failed for testPath=/Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart: Error: Couldn't resolve the package 'flutter_dialogflow' in 'package:flutter_dialogflow/dialogflow_v2.dart'.
+  lib/views/home_page.dart:4:8: Error: Not found: 'package:flutter_dialogflow/dialogflow_v2.dart'
+  import 'package:flutter_dialogflow/dialogflow_v2.dart';
+         ^
+  lib/views/home_page.dart:49:37: Error: The parameter 'query' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    Future _dialogFlowRequest({String query}) async {
+                                      ^^^^^
+  lib/views/home_page.dart:74:29: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    void _sendMessage({String text}) {
+                              ^^^^
+  lib/views/home_page.dart:80:28: Error: The parameter 'name' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    void _addMessage({String name, String text, ChatMessageType type}) {
+                             ^^^^
+  lib/views/home_page.dart:80:41: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    void _addMessage({String name, String text, ChatMessageType type}) {
+                                          ^^^^
+  lib/views/home_page.dart:80:63: Error: The parameter 'type' can't have a value of 'null' because of its type 'ChatMessageType', but the implicit default value is 'null'.
+   - 'ChatMessageType' is from 'package:chatbot/models/chat_message.dart' ('lib/models/chat_message.dart').
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    void _addMessage({String name, String text, ChatMessageType type}) {
+                                                                ^^^^
+  lib/models/chat_message.dart:9:10: Error: The parameter 'name' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+      this.name,
+           ^^^^
+  lib/models/chat_message.dart:10:10: Error: The parameter 'text' can't have a value of 'null' because of its type 'String', but the implicit default value is 'null'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+      this.text,
+           ^^^^
+  lib/widgets/chat_message_list_item.dart:16:39: Error: The parameter 'padding' can't have a value of 'null' because of its type 'EdgeInsets', but the implicit default value is 'null'.
+   - 'EdgeInsets' is from 'package:flutter/src/painting/edge_insets.dart' ('/private/tmp/chatbot-sdk-3.50.0/packages/flutter/lib/src/painting/edge_insets.dart').
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    Widget _showSentMessage({EdgeInsets padding, TextAlign textAlign}) {
+                                        ^^^^^^^
+  lib/widgets/chat_message_list_item.dart:16:58: Error: The parameter 'textAlign' can't have a value of 'null' because of its type 'TextAlign', but the implicit default value is 'null'.
+   - 'TextAlign' is from 'dart:ui'.
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    Widget _showSentMessage({EdgeInsets padding, TextAlign textAlign}) {
+                                                           ^^^^^^^^^
+  lib/widgets/chat_message_list_item.dart:7:29: Error: The parameter 'chatMessage' can't have a value of 'null' because of its type 'ChatMessage', but the implicit default value is 'null'.
+   - 'ChatMessage' is from 'package:chatbot/models/chat_message.dart' ('lib/models/chat_message.dart').
+  Try adding either an explicit non-'null' default value or the 'required' modifier.
+    ChatMessageListItem({this.chatMessage});
+                              ^^^^^^^^^^^
+  test/widget_test.dart:9:35: Error: Couldn't find constructor 'TutorApp'.
+      await tester.pumpWidget(const TutorApp());
+                                    ^^^^^^^^
+  test/widget_test.dart:24:35: Error: Couldn't find constructor 'TutorApp'.
+      await tester.pumpWidget(const TutorApp());
+                                    ^^^^^^^^
+  test/widget_test.dart:36:29: Error: Method not found: 'TutorApp'.
+      await tester.pumpWidget(TutorApp(tutor: tutor));
+                              ^^^^^^^^
+  test/widget_test.dart:61:20: Error: Couldn't find constructor 'HomePage'.
+        child: const HomePage(),
+                     ^^^^^^^^
+  lib/views/home_page.dart:57:5: Error: 'AuthGoogle' isn't a type.
+      AuthGoogle authGoogle = await AuthGoogle(fileJson: "assets/credentials.json").build();
+      ^^^^^^^^^^
+  lib/views/home_page.dart:58:5: Error: 'Dialogflow' isn't a type.
+      Dialogflow dialogflow = Dialogflow(authGoogle: authGoogle, language: "pt-BR");
+      ^^^^^^^^^^
+  lib/views/home_page.dart:59:5: Error: 'AIResponse' isn't a type.
+      AIResponse response = await dialogflow.detectIntent(query);
+      ^^^^^^^^^^
+  lib/views/home_page.dart:57:35: Error: The method 'AuthGoogle' isn't defined for the type '_HomePageState'.
+   - '_HomePageState' is from 'package:chatbot/views/home_page.dart' ('lib/views/home_page.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'AuthGoogle'.
+      AuthGoogle authGoogle = await AuthGoogle(fileJson: "assets/credentials.json").build();
+                                    ^^^^^^^^^^
+  lib/views/home_page.dart:58:29: Error: The method 'Dialogflow' isn't defined for the type '_HomePageState'.
+   - '_HomePageState' is from 'package:chatbot/views/home_page.dart' ('lib/views/home_page.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'Dialogflow'.
+      Dialogflow dialogflow = Dialogflow(authGoogle: authGoogle, language: "pt-BR");
+                              ^^^^^^^^^^
+  lib/views/home_page.dart:110:63: Error: The getter 'accentColor' isn't defined for the type 'ThemeData'.
+   - 'ThemeData' is from 'package:flutter/src/material/theme_data.dart' ('/private/tmp/chatbot-sdk-3.50.0/packages/flutter/lib/src/material/theme_data.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'accentColor'.
+            icon: new Icon(Icons.send, color: Theme.of(context).accentColor),
+                                                                ^^^^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart: loading /Users/kleber/Projects/chatbot-aulas-flutter/test/widget_test.dart

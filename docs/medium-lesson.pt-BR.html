@@ -1,0 +1,326 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><body><h1>Criando um Chatbot com Flutter e DialogFlow</h1>
+<p>Notas de aula do prof. Kleber de Oliveira Andrade — revisão de 17 de novembro de 2026.</p>
+<figure><img src="https://raw.githubusercontent.com/kleberandrade/chatbot-aulas-flutter/master/docs/images/medium-cover.png" alt="Ilustração conceitual de balões de conversa, livro de programação e cartões de intenção e entidade em papel recortado."><figcaption>Ilustração conceitual criada com IA para esta aula; não é uma captura do aplicativo nem um diagrama de arquitetura.</figcaption></figure>
+<p>Nesta aula vamos construir e compreender uma interface de conversa com Flutter, separar as regras das mensagens da interface e relacionar o exemplo aos conceitos de intents e entidades do Dialogflow ES. Você poderá executar e testar o projeto sem conta na nuvem. Depois, estudaremos o caminho de uma integração remota segura.</p>
+<p><strong>Mudança importante em relação à aula de 2019:</strong> não colocamos mais uma chave de conta de serviço em assets/credentials.json. Uma chave distribuída em um aplicativo pode ser extraída. O exemplo atual é uma <strong>demonstração local, com regras explícitas</strong>; ele não faz consultas ao Dialogflow, não treina um modelo e não é IA generativa. Nenhum servidor remoto foi implementado ou validado nesta revisão.</p>
+<h2>1. O que um chatbot faz?</h2>
+<p>Um chatbot oferece uma interface de conversa para uma tarefa delimitada: consultar cursos, encontrar instruções ou responder perguntas frequentes. Uma conversa útil não precisa fingir ser humana; precisa explicar suas capacidades, reconhecer limites e oferecer recuperação quando não entende uma pergunta. O tutor desta aula se apresenta como demonstração local e responde com um fallback quando não encontra uma regra.</p>
+<p>O contexto histórico continua relevante: a pergunta de Alan Turing sobre máquinas e inteligência inspirou pesquisas posteriores em conversação. Nosso exercício, porém, avalia comportamentos observáveis de um programa, sem usar o Teste de Turing como requisito de qualidade e sem atribuir compreensão humana às regras locais.</p>
+<h2>2. Agente, intent, entidade e sessão</h2>
+<p>No Dialogflow ES, o <strong>agente</strong> reúne a configuração da conversa. Uma <strong>intent</strong> classifica o objetivo de uma mensagem; frases de treinamento exemplificam maneiras de pedir a mesma coisa. Uma <strong>entidade</strong> descreve um tipo de valor a extrair. O <strong>parâmetro</strong> recebe o valor extraído. Contextos permitem restringir intents conforme o estado de uma conversa. A <strong>sessão</strong> identifica uma conversa, e não deve ser compartilhada entre usuários.</p>
+<p>Em “Quero aprender Flutter”, o objetivo pode ser consultar um curso; a entidade course tem o valor Flutter. Na implementação local, mostramos intent: course e course: Flutter para tornar o resultado visível. Esses rótulos vêm de comparações no código. No Dialogflow, classificação e extração são realizadas pelo agente configurado. Uma regra por substring não tem a generalização do NLU e pode interpretar mal negações ou perguntas com vários assuntos.</p>
+<h2>3. Preparando e executando o projeto</h2>
+<p>Ambiente validado: <strong>Flutter 3.50.0</strong>, revisão estável ab2912035e160d9cad6306df307576da6128ebdb, e <strong>Dart 3.14.0</strong>. Instale esse SDK pelo arquivo oficial de versões e confirme flutter --version antes de seguir. Chrome foi a plataforma realmente executada nesta revisão; Android e iOS receberam atualização dos modelos de projeto, mas não foram compilados nem testados em aparelho.</p>
+<pre>git clone https://github.com/kleberandrade/chatbot-aulas-flutter.git
+cd chatbot-aulas-flutter
+flutter --version
+flutter pub get --enforce-lockfile
+flutter run -d chrome</pre>
+<p>Abra o app e envie “Quero aprender Flutter”. Experimente também “O que é uma intent?” e “O que é uma entidade?”. Pergunte algo fora desses temas e observe a resposta de limite. A conversa existe apenas na memória: reiniciar ou recarregar elimina as mensagens. Não envie dados pessoais. A lógica não depende de rede; o carregamento inicial do motor e das fontes web ainda pode precisar dela.</p>
+<figure><img src="https://raw.githubusercontent.com/kleberandrade/chatbot-aulas-flutter/master/docs/images/app-desktop.jpg" alt="Captura real no Chrome: bolha do usuário pedindo Flutter, resposta do tutor local, intent course e entidade course Flutter."><figcaption>Aplicativo real, compilação web executada no Chrome em 17/11/2026. As respostas e os metadados são locais, sem consulta à nuvem.</figcaption></figure>
+<h2>4. Dependências atuais e organização</h2>
+<p>O manifesto completo desta revisão é:</p>
+<pre>name: chatbot
+description: A safe, offline-first conversational classroom for Flutter and Dialogflow concepts.
+publish_to: none
+version: 2.0.0+2
+environment:
+  sdk: ^3.14.0
+  flutter: &#x27;&gt;=3.50.0&#x27;
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.11.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true</pre>
+<p>material_ui 1.11.1 fornece os componentes Material; o import antigo package:flutter/material.dart está descontinuado neste SDK. flutter_lints 6.0.0 fornece as regras de análise. O pacote flutter_dialogflow e a autenticação direta do cliente foram removidos. O pubspec.lock registra as versões efetivas e deve acompanhar o aplicativo.</p>
+<p>As dependências diretas estão nas versões estáveis atuais compatíveis. Há dois limites do próprio SDK: material_color_utilities fica em 0.13.0, embora o catálogo tenha 0.13.1; test_api fica em 0.7.14, embora exista 0.7.15. Não usamos overrides para forçar versões incompatíveis. <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/docs/dependencies.md">O registro de dependências</a> apresenta todas as versões resolvidas.</p>
+<p>O domínio fica em lib/domain/local_tutor.dart e lib/domain/conversation.dart. A tela está em lib/views/home_page.dart e as bolhas em lib/widgets/chat_message_list_item.dart. lib/main.dart monta o aplicativo. Os testes ficam em test/. Use o clone completo para executar: os trechos de interface discutidos abaixo são partes dos arquivos vinculados, não substitutos isolados da tela inteira.</p>
+<p>Nos exemplos editoriais, retiramos somente linhas vazias para evitar que o importador do Medium divida um bloco em vários. Conteúdo, aspas, indentação e quebras das linhas não vazias correspondem às fontes. Os arquivos completos no repositório preservam a formatação do Dart.</p>
+<h2>5. Uma fronteira clara para as respostas</h2>
+<p>Comece pelo contrato Tutor. Ele recebe uma pergunta e devolve BotReply com texto, intent e entidades. A interface permite trocar o mecanismo de resposta sem misturar autenticação e widgets. LocalTutor mantém classify como função pura: a mesma entrada produz o mesmo resultado. Este é o arquivo completo lib/domain/local_tutor.dart:</p>
+<pre>/// The integration boundary. A remote implementation must call your own server.
+abstract interface class Tutor {
+  Future&lt;BotReply&gt; reply(String text);
+}
+class BotReply {
+  const BotReply(this.text, this.intent, [this.entities = const {}]);
+  final String text;
+  final String intent;
+  final Map&lt;String, String&gt; entities;
+}
+/// Deterministic teaching rules. This does not call or emulate Dialogflow NLU.
+class LocalTutor implements Tutor {
+  const LocalTutor();
+  @override
+  Future&lt;BotReply&gt; reply(String text) async =&gt; classify(text);
+  BotReply classify(String text) {
+    final query = text.toLowerCase();
+    if (RegExp(
+      r&#x27;(^|\s)(oi|ola|olá|bom dia|boa tarde|boa noite)(?=\s|[!?. ,]|$)&#x27;,
+    ).hasMatch(query)) {
+      return const BotReply(
+        &#x27;Olá! Sou o tutor local. Pergunte sobre Flutter, intents ou entidades.&#x27;,
+        &#x27;greeting&#x27;,
+      );
+    }
+    if (query.contains(&#x27;intent&#x27;) || query.contains(&#x27;intenç&#x27;)) {
+      return const BotReply(
+        &#x27;Uma intent representa o objetivo de uma mensagem. Exemplo: consultar um curso. &#x27;
+            &#x27;Aqui usamos regras explícitas; no Dialogflow você fornece frases de treinamento.&#x27;,
+        &#x27;intent&#x27;,
+      );
+    }
+    if (query.contains(&#x27;entidad&#x27;) || query.contains(&#x27;entit&#x27;)) {
+      return const BotReply(
+        &#x27;Uma entidade identifica um valor na frase. Em “quero aprender Flutter”, &#x27;
+            &#x27;o curso é Flutter. Experimente essa frase!&#x27;,
+        &#x27;entity&#x27;,
+      );
+    }
+    if (query.contains(&#x27;flutter&#x27;) || RegExp(r&#x27;\bdart\b&#x27;).hasMatch(query)) {
+      final course = query.contains(&#x27;flutter&#x27;) ? &#x27;Flutter&#x27; : &#x27;Dart&#x27;;
+      return BotReply(
+        &#x27;$course é um dos temas desta aula. Comece pelo README do projeto e execute os testes. &#x27;
+            &#x27;Esta resposta veio de uma regra local, sem consulta externa.&#x27;,
+        &#x27;course&#x27;,
+        Map.unmodifiable({&#x27;course&#x27;: course}),
+      );
+    }
+    if (query.contains(&#x27;dialogflow&#x27;) || query.contains(&#x27;seguran&#x27;)) {
+      return const BotReply(
+        &#x27;Uma integração real passa pelo seu servidor autenticado, que chama o Dialogflow. &#x27;
+            &#x27;Nunca inclua uma chave de serviço no app. Este demonstrador não usa a nuvem.&#x27;,
+        &#x27;integration&#x27;,
+      );
+    }
+    if (query.contains(&#x27;obrigad&#x27;)) {
+      return const BotReply(
+        &#x27;De nada! Continue explorando e testando.&#x27;,
+        &#x27;thanks&#x27;,
+      );
+    }
+    if (query.contains(&#x27;ajuda&#x27;)) {
+      return const BotReply(
+        &#x27;Experimente: “O que é uma intent?”, “O que é uma entidade?” ou &#x27;
+            &#x27;“Quero aprender Flutter”. As regras são limitadas e estão no código.&#x27;,
+        &#x27;help&#x27;,
+      );
+    }
+    return const BotReply(
+      &#x27;Ainda não tenho uma regra para essa pergunta. Tente perguntar sobre &#x27;
+          &#x27;Flutter, intents, entidades ou Dialogflow.&#x27;,
+      &#x27;fallback&#x27;,
+    );
+  }
+}</pre>
+<p>As regras têm precedência: saudação, explicação de intent, explicação de entidade, curso, integração, agradecimento, ajuda e fallback. Observe a diferença entre responder sobre entidades e extrair um curso. Essa ordem é uma decisão didática explícita; ela não constitui um classificador geral de linguagem natural. Para evoluir o domínio, primeiro acrescente exemplos positivos e negativos nos testes.</p>
+<h2>6. Mensagens e o ciclo de uma conversa</h2>
+<p>Cada ChatMessage possui ID, texto, autor e instante. As respostas também podem trazer intent e entidades. A lista conserva a ordem de inserção; não ordenamos pelo relógio, que pode repetir horários ou mudar. A cópia não modificável impede que a tela altere o histórico por fora do controlador. Este é o arquivo completo lib/domain/conversation.dart:</p>
+<pre>import &#x27;dart:async&#x27;;
+import &#x27;package:flutter/foundation.dart&#x27;;
+import &#x27;local_tutor.dart&#x27;;
+export &#x27;local_tutor.dart&#x27; show BotReply, Tutor;
+enum Author { you, tutor }
+class ChatMessage {
+  const ChatMessage({
+    required this.id,
+    required this.text,
+    required this.author,
+    required this.time,
+    this.intent,
+    this.entities = const {},
+  });
+  final int id;
+  final String text;
+  final Author author;
+  final DateTime time;
+  final String? intent;
+  final Map&lt;String, String&gt; entities;
+}
+/// One writer, one in-flight turn. Generation invalidates reset/disposed work.
+class Conversation extends ChangeNotifier {
+  Conversation({
+    required this.tutor,
+    DateTime Function()? clock,
+    this.timeout = const Duration(seconds: 15),
+  }) : _clock = clock ?? DateTime.now;
+  static const maxCodePoints = 500;
+  final Tutor tutor;
+  final DateTime Function() _clock;
+  final Duration timeout;
+  final List&lt;ChatMessage&gt; _messages = [];
+  List&lt;ChatMessage&gt; get messages =&gt; List.unmodifiable(_messages);
+  bool _isSending = false;
+  bool get isSending =&gt; _isSending;
+  String? _error;
+  String? get error =&gt; _error;
+  int _generation = 0;
+  int _nextId = 0;
+  bool _disposed = false;
+  static bool validText(String text) =&gt;
+      text.trim().isNotEmpty &amp;&amp; text.trim().runes.length &lt;= maxCodePoints;
+  Future&lt;bool&gt; send(String text) async {
+    if (_disposed || _isSending || _error != null || !validText(text)) {
+      return false;
+    }
+    final clean = text.trim();
+    _messages.add(
+      ChatMessage(
+        id: _nextId++,
+        text: clean,
+        author: Author.you,
+        time: _clock(),
+      ),
+    );
+    await _respond(clean);
+    return true;
+  }
+  Future&lt;void&gt; retry() async {
+    if (_disposed || _isSending || _error == null) return;
+    await _respond(_messages.last.text);
+  }
+  Future&lt;void&gt; _respond(String text) async {
+    final generation = _generation;
+    _isSending = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final answer = await tutor.reply(text).timeout(timeout);
+      if (!_current(generation)) return;
+      if (answer.text.trim().isEmpty) {
+        throw const FormatException(&#x27;Empty reply&#x27;);
+      }
+      _messages.add(
+        ChatMessage(
+          id: _nextId++,
+          text: answer.text.trim(),
+          author: Author.tutor,
+          time: _clock(),
+          intent: answer.intent,
+          entities: Map.unmodifiable(answer.entities),
+        ),
+      );
+    } catch (_) {
+      if (!_current(generation)) return;
+      _error =
+          &#x27;Não foi possível responder. Tente novamente ou reinicie a conversa.&#x27;;
+    } finally {
+      if (_current(generation)) {
+        _isSending = false;
+        notifyListeners();
+      }
+    }
+  }
+  bool _current(int generation) =&gt; !_disposed &amp;&amp; generation == _generation;
+  void reset() {
+    if (_disposed) return;
+    _generation++;
+    _messages.clear();
+    _isSending = false;
+    _error = null;
+    notifyListeners();
+  }
+  @override
+  void dispose() {
+    _disposed = true;
+    _generation++;
+    super.dispose();
+  }
+}</pre>
+<p>send remove espaços externos, rejeita mensagens vazias e limita a entrada a 500 pontos de código Unicode. Isso não é o mesmo que 500 caracteres visuais: um emoji composto pode usar vários pontos. O contador da interface usa a mesma regra. Só uma resposta pode estar pendente. Se houver erro, a pessoa escolhe tentar novamente ou reiniciar; retry responde à mesma mensagem sem acrescentar outra bolha de usuário.</p>
+<p>O prazo de 15 segundos evita um estado de envio indefinido. Resposta vazia também vira uma falha recuperável. Não exibimos detalhes brutos de exceções. A geração da conversa muda em reset e dispose: uma resposta antiga é ignorada mesmo se a operação original terminar depois. Isso invalida o resultado; não cancela fisicamente uma futura chamada de rede. Para ações remotas, idempotência e cancelamento precisam ser tratados também no servidor.</p>
+<h2>7. Tema, bolhas, teclado e acessibilidade</h2>
+<p>O ponto de entrada completo utiliza material_ui e injeta o tutor local. A paleta creme, azul escuro e laranja, a tipografia e o espaçamento ajudam a distinguir o conteúdo de cada autor:</p>
+<pre>import &#x27;package:material_ui/material_ui.dart&#x27;;
+import &#x27;domain/local_tutor.dart&#x27;;
+import &#x27;views/home_page.dart&#x27;;
+export &#x27;views/home_page.dart&#x27; show HomePage;
+void main() =&gt; runApp(const TutorApp());
+class TutorApp extends StatelessWidget {
+  const TutorApp({super.key, this.tutor = const LocalTutor()});
+  final Tutor tutor;
+  @override
+  Widget build(BuildContext context) =&gt; MaterialApp(
+    title: &#x27;Conversa • Laboratório de chatbot&#x27;,
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFA33F17)),
+      scaffoldBackgroundColor: const Color(0xFFF7F4EF),
+      textTheme: const TextTheme(
+        headlineMedium: TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF202D3D),
+        ),
+        bodyLarge: TextStyle(fontSize: 16, height: 1.5),
+        bodyMedium: TextStyle(fontSize: 14, height: 1.45),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    ),
+    home: HomePage(tutor: tutor),
+  );
+}</pre>
+<p>A <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/lib/views/home_page.dart">HomePage completa</a> cria e descarta Conversation, TextEditingController, ScrollController e FocusNode. Ela organiza um painel didático lateral em telas largas e uma conversa compacta em telas estreitas. A lista tem rolagem; o campo arredondado tem rótulo, contador e erro de limite. Enviar funciona pelo botão e pela ação send do teclado. Enquanto espera uma resposta, a entrada fica indisponível e aparece um estado de envio. A falha oferece “Tentar novamente”. Reiniciar limpa o histórico e invalida respostas antigas.</p>
+<p>Este trecho é o método _send da tela, responsável por validar antes de limpar o campo e devolver o foco ao teclado ao terminar:</p>
+<pre>Future&lt;void&gt; _send([String? suggestion]) async {
+    final text = suggestion ?? _input.text;
+    if (_chat.isSending ||
+        _chat.error != null ||
+        !Conversation.validText(text)) {
+      return;
+    }
+    _input.clear();
+    await _chat.send(text);
+    if (mounted &amp;&amp; _chat.error == null) {
+      _focus.requestFocus();
+    }
+  }</pre>
+<p>Cada bolha mostra “Você” ou “Tutor local”, texto selecionável, data e hora. As respostas mostram os metadados didáticos. O resumo semântico inclui o conteúdo real da mensagem, autor e instante; respostas recebidas usam uma região de anúncio. Os botões têm nomes acessíveis. Os testes de widgets verificam uma superfície de 360 × 800 com texto ampliado em 2×; isso não equivale a uma sessão manual com VoiceOver.</p>
+<p>No <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/lib/widgets/chat_message_list_item.dart">arquivo completo das bolhas</a>, a função abaixo formata o instante na hora local. A inclusão do ano evita ambiguidade quando o histórico atravessa datas:</p>
+<pre>String messageDate(DateTime value) {
+  final local = value.toLocal();
+  String two(int n) =&gt; n.toString().padLeft(2, &#x27;0&#x27;);
+  return &#x27;${two(local.day)}/${two(local.month)}/${local.year} • ${two(local.hour)}:${two(local.minute)}&#x27;;
+}</pre>
+<figure><img src="https://raw.githubusercontent.com/kleberandrade/chatbot-aulas-flutter/master/docs/images/app-mobile.jpg" alt="Captura real do app web em viewport de 390 por 844 pixels: conversa com datas, autores, intent course, entidade Flutter e campo de envio arredondado."><figcaption>A mesma compilação web em viewport estreito de 390 × 844 no Chrome. É teste responsivo do navegador, não execução em telefone físico.</figcaption></figure>
+<h2>8. Como planejar um agente no Dialogflow ES</h2>
+<p>A etapa local está pronta sem criar contas. Se você já tem um projeto autorizado para estudar Dialogflow ES, consulte o guia oficial de configuração e as condições de preço e permissões antes de ativar serviços. Esta revisão não cria projeto, conta, cobrança, chave, permissão nem deploy. As instruções seguintes descrevem um desenho de agente; nenhum agente remoto foi treinado ou testado aqui.</p>
+<p>No console do Dialogflow ES, escolha um agente de estudo com idioma pt-BR e fuso apropriado. Mantenha uma intent de boas-vindas e uma de fallback. Crie a intent course.lookup e acrescente frases de treinamento como “Quero aprender Flutter”, “Tem curso de Dart?” e “Quero estudar Flutter”. Evite usar informações profissionais antigas do professor como dados atuais do bot.</p>
+<p>Crie o tipo de entidade course com valores canônicos Flutter e Dart; você pode cadastrar sinônimos pertinentes ao seu domínio. Nas frases, anote a palavra do curso como parâmetro course desse tipo. Uma resposta de estudo pode usar “Você escolheu $course. Consulte o material do curso.” Se o curso for obrigatório, configure a coleta desse parâmetro e uma pergunta de esclarecimento. Salve e experimente variações no simulador do console, além de perguntas fora do domínio. Registre o objetivo esperado, o valor extraído e o resultado observado; não presuma que toda variação será compreendida.</p>
+<p>A intent remota course.lookup e o rótulo local course têm papéis equivalentes neste exemplo, mas nomes e implementação são independentes. As regras locais não são exportadas automaticamente para o Dialogflow, e o app atual não consulta o simulador do console.</p>
+<h2>9. Integração real: credenciais no servidor</h2>
+<p>O fluxo proposto é: aplicativo Flutter → seu servidor autenticado → API Dialogflow ES v2 → seu servidor → aplicativo. Um futuro adaptador Tutor chamaria o servidor da sua aplicação. Ele não receberia a chave do Google e não autenticaria uma conta de serviço no dispositivo. Nenhum endpoint desse servidor existe neste repositório.</p>
+<p>O servidor deve identificar e autorizar a pessoa, validar novamente a mensagem, limitar frequência e tamanho e manter uma sessão por conversa. Ele cria um ID de sessão do Dialogflow com até 36 bytes, sem reutilizá-lo para usuários diferentes. Com uma identidade de workload e Application Default Credentials, chama Sessions.detectIntent com text e languageCode pt-BR e traduz intent, parâmetros e resposta para um contrato próprio. Prefira identidades gerenciadas ou federação a chaves permanentes e use apenas as permissões necessárias.</p>
+<p>Um contrato possível para o seu servidor é POST /v1/conversations/{conversationId}/messages, com requestId e text. A resposta contém reply, intent e valores de entidades validados. O servidor mantém a relação entre usuário autenticado, conversa e sessão Google; não aceite um caminho arbitrário de projeto/sessão fornecido pelo cliente. Defina prazos, CORS, tamanho máximo das respostas e política de retenção. Evite registrar o conteúdo da conversa sem necessidade e consentimento.</p>
+<p>O bloqueio de duplo clique do app não evita efeitos duplicados no serviço: se o cliente expirar e tentar de novo, a primeira chamada pode já ter sido processada. Use requestId e armazenamento de resultados no servidor para garantir idempotência de ações de negócio. Reiniciar precisa também invalidar a sessão remota. <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/docs/architecture.md">A documentação técnica</a> detalha essa fronteira proposta e os limites ainda não validados.</p>
+<p><strong>Se você seguiu a versão antiga e distribuiu uma chave real dentro do aplicativo, trate-a como exposta:</strong> o proprietário deve revogar ou rotacionar a chave no Google Cloud e revisar os registros de acesso. Apagar o arquivo de um commit novo não revoga a credencial. Não usamos, reproduzimos nem rotacionamos chaves nesta atualização. Arquivos de ambiente, ofuscação e --dart-define também não protegem um segredo embarcado no cliente.</p>
+<h2>10. Verificando comportamento e compilação</h2>
+<p>A revisão começou por testes de domínio que falharam pela ausência das novas classes. A primeira execução comportamental revelou um problema de limite de palavra com “Olá!”, corrigido na regra de saudação. Os testes de widgets foram escritos antes de substituir a interface antiga; depois, um teste com letras ampliadas reproduziu um transbordamento do cabeçalho em tela estreita. As falhas e correções estão registradas no <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/docs/modernization-log.md">log da modernização</a>. Nem toda asserção posterior foi escrita antes da implementação.</p>
+<pre>dart format --output=none --set-exit-if-changed lib test
+flutter analyze --fatal-infos
+flutter test --coverage
+flutter build web --release</pre>
+<p>Foram aprovados 11 testes determinísticos de domínio e widgets: regras e entidades, entrada vazia e limite Unicode, ordem/IDs/datas, exclusão de envio concorrente, retry sem duplicação, reset com resposta antiga, descarte após dispose, timeout e resposta vazia, teclado e reinício, entrada inválida, erro/recuperação e tela estreita com texto ampliado. A análise estática não encontrou problemas. A compilação web release passou e foi executada no Chrome no macOS; as duas imagens do aplicativo vieram dessa execução real.</p>
+<p>O workflow Flutter quality executa formatação, análise, testes e build web na branch master e em pull requests, com SDK e ações fixados. Ele guarda o build e o arquivo LCOV como artefato. O resultado deve ser conferido no <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/.github/workflows/flutter.yml">workflow real</a>, sem inventar percentuais de cobertura. crapper, dryer e mutator estão instalados, mas seus formatos suportados não incluem Dart; por isso não relatamos pontuações dessas ferramentas.</p>
+<p>Android e iOS tiveram os modelos atualizados; builds nativos, aparelhos físicos, VoiceOver e integração externa permanecem não verificados. As licenças Android pendentes não foram aceitas. Não houve ativação de serviço pago, publicação de pacote nem deploy. <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/docs/validation.md">O registro de validação</a> informa os comandos e limites para repetir os testes.</p>
+<h2>Referências e créditos</h2>
+<p>Código e aula de Kleber de Oliveira Andrade; a licença MIT e a autoria de 2019 foram preservadas. <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/LICENSE">Licença do repositório</a>. A capa nova é uma ilustração conceitual criada com IA; as imagens do aplicativo são capturas reais desta revisão. <a href="https://github.com/kleberandrade/chatbot-aulas-flutter/blob/master/docs/image-credits.md">Proveniência das imagens e créditos dos modelos do Flutter</a>.</p>
+<p>Fontes oficiais: <a href="https://docs.flutter.dev/install/archive">versões do Flutter</a>; <a href="https://docs.cloud.google.com/dialogflow/es/docs/intents-overview">intents do Dialogflow ES</a>; <a href="https://docs.cloud.google.com/dialogflow/es/docs/entities-overview">entidades</a>; <a href="https://docs.cloud.google.com/dialogflow/es/docs/quick/api">sessões e detectIntent</a>; <a href="https://docs.cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys">boas práticas para chaves de serviço</a>.</p>
+<p>Leituras e créditos da aula original, como contexto histórico e complementar: <a href="https://www.csee.umbc.edu/courses/471/papers/turing.pdf">Computing Machinery and Intelligence, de Alan Turing</a>; <a href="https://medium.com/botsbrasil">Bots Brasil</a>; <a href="https://www.udemy.com/dialogflow-completo/">curso de Rogério Guimaraes</a>; <a href="https://imasters.com.br/desenvolvimento/um-guia-para-desenvolvedores-de-chatbots">Um guia para desenvolvedores de chatbots, de Michael Yuan</a>; <a href="https://imasters.com.br/desenvolvimento/google-e-os-cinco-sentidos">Google e os cinco sentidos, de Ricardo Ogliari</a>. Esses materiais não substituem as APIs e orientações atuais acima. O vídeo do Nerdologia citado na versão original permanece um crédito de contexto; não reutilizamos imagens ou avatares de terceiros.</p>
+<h2>Cinco exercícios práticos</h2>
+<ol>
+<li><strong>Bolhas e contraste.</strong> Objetivo: distinguir visualmente a resposta de fallback sem depender só da cor. Critério de conclusão: manter autor/data legíveis em 360 pixels com texto 2× e adicionar um teste de widget que reconheça o estado.</li>
+<li><strong>Datas e ordenação.</strong> Objetivo: agrupar mensagens por dia com um separador. Critério de conclusão: um teste que atravesse a meia-noite deve mostrar as duas datas e preservar a ordem de inserção, mesmo com horários repetidos.</li>
+<li><strong>Campo e teclado.</strong> Objetivo: permitir Shift+Enter para nova linha e Enter para enviar. Critério de conclusão: testes de teclado comprovam ambas as ações, preservam o limite de 500 pontos Unicode e rejeitam texto composto apenas por espaços.</li>
+<li><strong>Dez intents para outro domínio.</strong> Objetivo: modelar um novo assistente de estudo com dez objetivos diferentes. Critério de conclusão: cada intent tem três frases de exemplo, resposta e caso fora do domínio; uma suíte determinística registra os resultados. Identifique o que são regras locais e o que seria um agente opcional do Dialogflow.</li>
+<li><strong>Uma entidade e integração segura.</strong> Objetivo: acrescentar um sinônimo de curso e documentar seu equivalente no tipo de entidade course do Dialogflow ES. Critério de conclusão: testes retornam o valor canônico e tratam o curso desconhecido; qualquer extensão remota deve passar pelo seu servidor autenticado, com sessão isolada e nenhuma chave de conta de serviço no cliente.</li>
+</ol></body></html>

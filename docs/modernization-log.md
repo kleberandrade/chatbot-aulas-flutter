@@ -1,0 +1,17 @@
+# Modernization log
+
+## 2026-11-17
+
+- Read shared project instructions and reduced principles. Cloned the public repository into its own directory; verified clean `master`, origin and origin/HEAD. Starting commit: `8c2c396`.
+- Read all application sources and manifests. Credential file is absent, ignored and not listed under a credentials path in reachable Git history. No credentials were opened or used. The old lesson instructed distributing a service-account key; removed that unsafe active path.
+- Resolved the actual README short link to Medium story `f828e5301101`, read the complete public lesson, verified Kleber Andrade ownership and opened its available Edit story action. No unrelated tabs or repositories were edited.
+- Verified Flutter stable ref/tag `ab2912035e160d9cad6306df307576da6128ebdb`: 3.50.0, Dart 3.14.0. Created a private SDK copy for this task. The release-catalog storage URL returned 404; upstream stable ref and executable version agree. No shared SDK was updated.
+- Wrote domain tests first; ran and observed expected missing-domain compilation failures (`tdd-domain-red.txt`). Implemented deterministic local intent/entity teaching rules and serialized conversation flow. First behavioral run exposed an accented greeting word-boundary bug; corrected the rule.
+- Wrote widget behavior tests before replacing the legacy UI; recorded expected obsolete/null-safety API failures (`tdd-widget-red.txt`). Implemented responsive conversation UI, author/date bubbles, Unicode limit, keyboard send, reset, pending/error/retry and disposal safety. Fixed narrow-screen large-text header layout from a reproduced failing test.
+- Refreshed Android/iOS templates with the same `com.example.chatbot` identity and added web using Flutter 3.50.0. Removed obsolete Groovy build scripts to avoid competing Gradle configurations. Native platforms are template migrations, not certified device builds.
+- Ran crapper, dryer and mutator help. All are installed but support Clojure, Java, Go, TypeScript, Rust and Python, not Dart. No CRAP/duplication/mutation score is claimed. Reviewed branching and shared state manually; used Flutter tests for behavior.
+- Resolved all compatible stable dependencies. Catalog newer versions of material_color_utilities and test_api conflict with Flutter SDK pins; no overrides. Removed flutter_dialogflow and its obsolete client authentication chain.
+- Ten initial domain/widget tests passed; static analysis passed. Release web build passed and was served only on loopback for real Chrome checks. Added explicit accessible message summaries after inspecting browser semantics.
+- Expanded local-topic checks: eleven tests now pass. Confirmed keyboard submission, visible course intent/entity, semantic message content, and the real web release at default Chrome width plus 390×844 responsive viewport. Captured both states; restored the viewport override afterward. No physical-phone or screen-reader session is claimed.
+- Created original speech-bubble application icons and a new conceptual AI-generated lesson cover. Rejected the first cover's unintended brand mark and generated a corrected logo-free cover; recorded provenance.
+- Committed application/domain changes (`ce35b5a`) and refreshed platform/CI scaffolding (`a2bfe23`) after local checks passed. Rewrote English setup/security/architecture/dependency/validation documentation and prepared the complete Portuguese lesson with eight source-aligned code blocks, fresh images and exactly five final exercises.

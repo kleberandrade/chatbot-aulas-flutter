@@ -1,0 +1,7 @@
+# Image provenance
+
+- `images/app-desktop.jpg` and `images/app-mobile.jpg`: real screenshots of this repository's web release in Chrome on 2026-11-17. The narrow capture uses viewport emulation, not a physical phone.
+- `images/medium-cover.png`: new conceptual illustration made with the built-in OpenAI image-generation tool on 2026-11-17. It is not a screenshot or a technical architecture diagram. Final prompt: “Edit this conceptual editorial cover. Remove the blue Flutter-like brand logo from inside the phone on the left and replace it with one small generic navy speech bubble with three cream dots, matching the paper-cut style. Keep all other elements, colors, composition, texture and dimensions identical. No brand logos or trademarks anywhere. This is a conceptual illustration, not a screenshot.” Initial art direction: warm paper-cut conversation bubbles, intent/entity learning cards and a programming book on cream, navy and orange, no text or third-party logos.
+- Application icons: original geometric speech-bubble artwork made for this revision, no third-party brand or avatar.
+- Flutter-generated Android/iOS/web scaffolding derives from Flutter's BSD-3-Clause templates; see [Flutter license](https://github.com/flutter/flutter/blob/3.50.0/LICENSE). Material icons are supplied by the licensed SDK/package assets; see the generated Flutter notices in release builds.
+- Original project and lessons: Kleber de Oliveira Andrade, 2019; repository MIT notice is preserved unchanged.
