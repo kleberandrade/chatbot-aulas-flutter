@@ -1,0 +1,55 @@
+{
+  "exerciseCount": 5,
+  "figures": [
+    {
+      "alt": "Ilustração conceitual de balões de conversa, livro de programação e cartões de intenção e entidade em papel recortado.",
+      "caption": "Ilustração conceitual criada com IA para esta aula; não é uma captura do aplicativo nem um diagrama de arquitetura.",
+      "complete": true,
+      "naturalWidth": 699,
+      "src": "https://miro.medium.com/v2/resize:fit:700/0*1KEflKW2I47Ty1TB.png"
+    },
+    {
+      "alt": "Captura real no Chrome: bolha do usuário pedindo Flutter, resposta do tutor local, intent course e entidade course Flutter.",
+      "caption": "Aplicativo real, compilação web executada no Chrome em 17/11/2026. As respostas e os metadados são locais, sem consulta à nuvem.",
+      "complete": true,
+      "naturalWidth": 699,
+      "src": "https://miro.medium.com/v2/resize:fit:700/0*4NwJ3cih6jnjBUhB.jpg"
+    },
+    {
+      "alt": "Captura real do app web em viewport de 390 por 844 pixels: conversa com datas, autores, intent course, entidade Flutter e campo de envio arredondado.",
+      "caption": "A mesma compilação web em viewport estreito de 390 × 844 no Chrome. É teste responsivo do navegador, não execução em telefone físico.",
+      "complete": true,
+      "naturalWidth": 237,
+      "src": "https://miro.medium.com/v2/resize:fit:390/0*i_MFPw83sKVNU4ys.jpg"
+    }
+  ],
+  "headings": [
+    "1. O que um chatbot faz?",
+    "2. Agente, intent, entidade e sessão",
+    "3. Preparando e executando o projeto",
+    "4. Dependências atuais e organização",
+    "5. Uma fronteira clara para as respostas",
+    "6. Mensagens e o ciclo de uma conversa",
+    "7. Tema, bolhas, teclado e acessibilidade",
+    "8. Como planejar um agente no Dialogflow ES",
+    "9. Integração real: credenciais no servidor",
+    "10. Verificando comportamento e compilação",
+    "Referências e créditos",
+    "Cinco exercícios práticos"
+  ],
+  "title": "Criando um Chatbot com Flutter e DialogFlow",
+  "url": "https://medium.com/flutter-comunidade-br/criando-um-chatbot-com-flutter-e-dialogflow-f828e5301101?postPublishedType=repub",
+  "ogImage": "https://miro.medium.com/v2/resize:fit:1200/0*1KEflKW2I47Ty1TB.png",
+  "codeMatches": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "republished": true,
+  "newsletterSent": false
+}
